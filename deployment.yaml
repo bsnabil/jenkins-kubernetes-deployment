@@ -1,22 +1,20 @@
-apiVersion: apps/v1
+apiVersion: apps/v1 
 kind: Deployment
 metadata:
-  name: deployment #The name of the Kubernetes Deployment to be created in the Kubernetes cluster
-  labels:
-    app: react-app
+  name: comingsoon-page-img-deployment 
+  namespace: comingsoon1
 spec:
-  replicas: 1 #The number of pods to be created in the Kubernetes cluster for the React.js application container
   selector:
     matchLabels:
-      app: react-app
+      app: comingsoon-page
+  replicas: 1
   template:
     metadata:
       labels:
-        app: react-app 
+        app: comingsoon-page
     spec:
       containers:
-      - name: react-app #The name of the react.js application container
-        image: nabil2222/react-application:latest  #The Docker image for building the React.js application container
+      - name: comingsoon-page
+        image: nginx
         ports:
-        - containerPort: 3000 #The port for the React.js application container
-
+        - containerPort: 80
