@@ -1,0 +1,153 @@
+[vagrant@master ~]$ history 
+    1  sudo yum update
+    2  sudo vi /etc/hosts 
+    3  ip addr sh 
+    4  sudo vi /etc/hosts 
+    5  sudo yum install bash-completion tree net-tools wget traceroute jq git
+    6  cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+    7  sudo modprobe overlay
+    8  sudo modprobe br_netfilter
+    9  cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+   10  sudo vim  /etc/sysctl.d/99-sysctl.conf
+   11  cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+   12  sudo sysctl --system
+   13  lsmod | grep br_netfilter
+   14  lsmod | grep overlay
+   15  cat <<EOF | sudo tee -a /etc/sysctl.d/k8s.conf
+net.ipv6.conf.all.forwarding=1
+EOF
+
+   16  sudo vi /etc/selinux/config
+   17  cat <<EOF | tee /etc/yum.repos.d/crio-stable.repo
+[crio-stable]
+name=CRI-O Stable v1.29
+baseurl=https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.29/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.29/rpm/repodata/repomd.xml.key
+EOF
+
+   18  sudo dnf install -y container-selinux
+   19  dnf install -y --repo crio-stable cri-o
+   20  sudo dnf install -y --repo crio-stable cri-o
+   21  curl -fsSL https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/Release.key |     gpg --dearmor -o /etc/apt/keyrings/cri-o-apt-keyring.gpg
+   22  echo "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/ /" |     tee /etc/apt/sources.list.d/cri-o.list
+   23  KUBERNETES_VERSION=v1.30
+   24  CRIO_VERSION=v1.30
+   25  cat <<EOF | tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/rpm/repodata/repomd.xml.key
+EOF
+
+   26  cat <<EOF | tee /etc/yum.repos.d/cri-o.repo
+[cri-o]
+name=CRI-O
+baseurl=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/repodata/repomd.xml.key
+EOF
+
+   27  sudo dnf install -y container-selinux
+   28  sudo dnf install -y cri-o kubelet kubeadm kubectl
+   29  sudo cat <<EOF | tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/rpm/repodata/repomd.xml.key
+EOF
+
+   30  sudo cat <<EOF | tee /etc/yum.repos.d/cri-o.repo
+[cri-o]
+name=CRI-O
+baseurl=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/repodata/repomd.xml.key
+EOF
+
+   31  sudo dnf install -y cri-o kubelet kubeadm kubectl
+   32  cat <<EOF | tee /etc/yum.repos.d/crio-stable.repo
+[crio-stable]
+name=CRI-O Stable v1.29
+baseurl=https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.29/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.29/rpm/repodata/repomd.xml.key
+EOF
+
+   33  sudo dnf clean all
+   34  sudo curl -L -o /etc/yum.repos.d/crio-stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/devel:kubic:libcontainers:stable.repo
+   35  cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+EOF
+
+   36  sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+   37  VERSION=1.28
+   38  OS=CentOS_8
+   39  curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/devel:/kubic:/libcontainers:/stable.repo
+   40  curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/devel:kubic:libcontainers:stable:cri-o:$VERSION.repo
+   41  sudo yum install cri-o cri-tools
+   42  curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/devel:kubic:libcontainers:stable.repo
+   43  sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/devel:kubic:libcontainers:stable.repo
+   44  sudo  curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:$VERSION/$OS/devel:kubic:libcontainers:stable:cri-o:$VERSION.repo
+   45  sudo yum install cri-o cri-tools
+   46  sudo vi /etc/fstab 
+   47  sudo mount -a
+   48  sudo swapoff -a
+   49  sudo kubeadm config images pull --cri-socket /var/run/crio/crio.sock
+   50  sudo setenforce 0
+   51  sudo systemctl enable --now crio
+   52  systemctl status crio
+   53  sudo yum -y install epel-release
+   54  sudo systemctl enable kubelet
+   55  sudo kubeadm config images pull --cri-socket /var/run/crio/crio.sock
+   56  sudo sudo kubeadm init   --pod-network-cidr=10.244.0.0/16   --cri-socket /var/run/crio/crio.sock   --upload-certs   --control-plane-endpoint=master   --apiserver-advertise-address=192.168.56.5
+   57    mkdir -p $HOME/.kube
+   58    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+   59    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+   60  ll
+   61  cd
+   62  cd /
+   63  ll
+   64  cd
+   65  sudo   mkdir -p $HOME/.kube
+   66    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+   67    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+   68  ll
+ 
+   74  scp -r .kube/ vagrant@192.168.56.6:~
+   75  kubectl get node
+   76  history 
+sudo kubeadm init \
+  --pod-network-cidr=10.244.0.0/16 \
+  --cri-socket /var/run/crio/crio.sock \
+  --upload-certs \
+  --control-plane-endpoint=master \
+  --apiserver-advertise-address=192.168.56.5
