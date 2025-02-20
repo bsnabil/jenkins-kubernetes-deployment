@@ -1,0 +1,41 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "eurolinux-vagrant/centos-stream-9"
+
+  # master-server
+  config.vm.define "master" do |master|
+    master.vm.hostname = "master"
+
+    master.vm.provider "virtualbox" do |v|
+      v.customize [ "modifyvm", :id, "--cpus", "2" ]
+      v.customize [ "modifyvm", :id, "--memory", "2048" ]
+    end
+
+    master.vm.network "private_network", ip: "192.168.56.5"
+
+
+  end
+  # worker1lication server
+  config.vm.define "worker1" do |worker1|
+    worker1.vm.hostname = "worker1"
+
+    worker1.vm.provider "virtualbox" do |v|
+      v.customize [ "modifyvm", :id, "--cpus", "1" ]
+      v.customize [ "modifyvm", :id, "--memory", "2048" ]
+    end
+
+    worker1.vm.network "private_network", ip: "192.168.56.6"
+  end
+  # worker2 server
+  config.vm.define "worker2" do |worker2|
+    worker2.vm.hostname = "worker2"
+
+    worker2.vm.provider "virtualbox" do |v|
+      v.customize [ "modifyvm", :id, "--cpus", "1" ]
+      v.customize [ "modifyvm", :id, "--memory", "2048" ]
+    end
+
+    worker2.vm.network "private_network", ip: "192.168.56.7"
+  end
+end
